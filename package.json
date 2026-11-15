@@ -1,0 +1,7 @@
+{
+  "name": "fic-dlc-deals",
+  "version": "2.0.0",
+  "description": "Promos DLC ETS2/ATS Steam pour BotGhost (FIC) via GitHub Actions",
+  "scripts": { "generate": "node generate.js" },
+  "engines": { "node": ">=18" }
+}
