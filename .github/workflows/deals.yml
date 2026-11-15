@@ -1,0 +1,29 @@
+name: Promos DLC Steam
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"   # toutes les 3 heures
+  workflow_dispatch:          # bouton "Run workflow" pour lancer à la main
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Générer les promos
+        run: node generate.js
+        env:
+          MIN_PCT: "1"
+      - name: Enregistrer si changement
+        run: |
+          git config user.name "fic-dlc-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "Promos DLC mises à jour"
+          git push
