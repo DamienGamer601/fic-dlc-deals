@@ -6,7 +6,7 @@ const GAMES = {
 
 const CC = 'FR';
 const LANG = 'french';
-const MAX_TEXT = 3300; // Components V2 : 4000 caractères max pour tout le message
+const MAX_TEXT = 3200; // Components V2 : 4000 caractères max pour tout le message
 
 const eur = (cents) =>
   (Number(cents) / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })
@@ -92,28 +92,31 @@ async function buildDeals(key, minPct = 1) {
   let length = 0, hidden = 0;
   for (const d of deals) {
     const icon = d.pct >= 50 ? '🔥' : '🏷️';
-    const ends = d.end && !commonEnd ? ` · fin <t:${d.end}:R>` : '';
+    const ends = d.end && !commonEnd ? ` · ⏳ <t:${d.end}:R>` : '';
     const line = `${icon} **-${d.pct}%** [${d.name}](${d.url}) **${eur(d.final)}** ~~${eur(d.original)}~~${ends}`;
     if (length + line.length + 1 > MAX_TEXT) { hidden++; continue; }
     lines.push(line); length += line.length + 1;
   }
-  if (hidden) lines.push(`-# … et ${hidden} autre(s) promo(s) sur Steam`);
+  if (hidden) lines.push(`-# … et ${hidden} autre(s) promo(s) sur Steam · and ${hidden} more deal(s) on Steam`);
 
   const text = deals.length
     ? lines.join('\n')
-    : `Aucun DLC ${game.short} en promo pour le moment.`;
+    : `🇫🇷 Aucun DLC ${game.short} en promo pour le moment.\n🇬🇧 No ${game.short} DLC on sale right now.`;
 
   const saved = totalOriginal - totalFinal;
   const summary = totalOriginal
-    ? `**Tous les DLC ${game.short} (${ids.length})** : ${eur(totalFinal)} au lieu de ${eur(totalOriginal)}` +
-      (saved > 0 ? ` · tu économises ${eur(saved)} (${Math.round((saved / totalOriginal) * 100)} %)` : '')
+    ? `💰 **Tous les DLC · All DLCs ${game.short} (${ids.length})** : **${eur(totalFinal)}** ~~${eur(totalOriginal)}~~` +
+      (saved > 0 ? `\n-# 🇫🇷 Tu économises ${eur(saved)} (${Math.round((saved / totalOriginal) * 100)} %) · 🇬🇧 You save ${eur(saved)}` : '')
     : '';
 
-  const title = `## 🚛 Promos DLC ${game.short}\n` +
+  const max = deals.length ? Math.max(...deals.map((d) => d.pct)) : 0;
+  const title = `## 🚛 Promos DLC ${game.short} · DLC Deals\n` +
     (deals.length
-      ? `**${deals.length}** promo(s) · jusqu'à **-${Math.max(...deals.map((d) => d.pct))}%**` +
-        (commonEnd ? ` · fin <t:${commonEnd}:R> (<t:${commonEnd}:f>)` : '')
-      : 'Pas de promo en cours');
+      ? `🇫🇷 **${deals.length}** promo(s) · jusqu'à **-${max}%**` +
+        (commonEnd ? ` · fin <t:${commonEnd}:R>` : '') +
+        `\n🇬🇧 **${deals.length}** deal(s) · up to **-${max}%**` +
+        (commonEnd ? ` · ends <t:${commonEnd}:R>` : '')
+      : '🇫🇷 Pas de promo en cours · 🇬🇧 No deals right now');
   const steam_url = `https://store.steampowered.com/dlc/${game.appid}/`;
 
   return {
